@@ -63,9 +63,5 @@
                 this.$emit('changeFilter', this.toDoFilterTask);
             }
         },
-        mounted() {
-            // Optional
-            this.$emit('changeFilter', this.toDoFilterTask);
-        },
     })
 </script>

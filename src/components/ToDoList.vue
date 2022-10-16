@@ -12,9 +12,15 @@
                 v-for="(toDo, index) in toDos"
                 :key="toDo.id"
                 :index="index"
-                :class="{ editing : toDo.editing, completed : toDo.completed }"
+                :class="{ editing : (toDo.id === currentEditID), completed : toDo.completed }"
             >
-                <input type="checkbox" class="toggle" v-model="toDo.completed" />
+                <input
+                    type="checkbox"
+                    class="toggle"
+                    v-model="toDo.completed"
+                    @click="e => handleToggle(toDo)"
+                />
+
                 <label
                     class="view"
                     @dblclick="editToDo(toDo)"
@@ -27,9 +33,10 @@
                     @keyup.enter="doneEdit(toDo)"
                     v-focus
                 />
+
                 <div
                     class="destroy"
-                    @click="$emit('removeItem', index)"
+                    @click="$emit('removeItem', toDo.id)"
                 ></div>
             </li>
         </ul>
@@ -47,6 +54,7 @@
         },
         data: () => ({
             cacheEdit: '',
+            currentEditID: null
         }),
         directives: {
             focus: {
@@ -58,14 +66,27 @@
         methods: {
             editToDo(toDo) {
                 this.cacheEdit = toDo.title;
-                toDo.editing = true;
+                this.currentEditID = toDo.id;
             },
             doneEdit(toDo) {
-                if (!toDo.title.trim()) {
+                const newTitle = toDo.title.trim();
+                if (newTitle) {
+                    this.$emit('editItem', {
+                        ...toDo,
+                        title: newTitle,
+                    });
+                }
+                else {
                     toDo.title = this.cacheEdit;
                 }
-                toDo.editing = false;
+                this.currentEditID = null;
             },
+            handleToggle(toDo) {
+                this.$emit('editItem', {
+                    ...toDo,
+                    completed: !toDo.completed,
+                });
+            }
         },
         computed: {
             anyRemaingTask() {

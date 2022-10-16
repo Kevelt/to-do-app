@@ -11,6 +11,7 @@
     <div class="">
         <ToDoList
             :toDos="toDoFilterTask"
+            @editItem="editToDo"
             @removeItem="removeToDo"
             @checkAllToDoTasks="checkAllToDoTasks"
         />
@@ -27,6 +28,8 @@
 import ToDoList from './ToDoList.vue';
 import ToDoFilter from './ToDoFilter.vue';
 
+import TodoDataService from "../services/TodoDataService";
+
 export default {
     components: {
         ToDoList,
@@ -35,32 +38,55 @@ export default {
     data: () => ({
         titleH1: 'ToDo App',
         newTodo: '',
-        idForTodo: 0,
         toDos: [],
         toDoFilterTask: [],
     }),
+    mounted() {
+        this.getToDos();
+    },
     methods: {
+        getToDos() {
+            TodoDataService.getAll()
+                .then(response => this.toDos = response.data)
+                // Error service
+                .catch(e => console.log(e));
+        },
         addToDo() {
-            if (!this.newTodo.trim().length) return;
-            this.toDos.push({
-                id: this.idForTodo,
-                title: this.newTodo,
+            const newTodo = this.newTodo.trim();
+            if (!newTodo.length) return;
+
+            const data = {
+                title: newTodo,
                 completed: false,
-                editing: false,
-            });
+            };
+            this.postRequestService(TodoDataService.create(data));
 
             this.newTodo = '';
-            this.idForTodo++;
         },
-        removeToDo(index) {
-            this.toDos.splice(index, 1);
+        editToDo(data) {
+            this.postRequestService(TodoDataService.update(data.id, data));
+        },
+        removeToDo(id) {
+            this.postRequestService(TodoDataService.delete(id));
         },
         checkAllToDoTasks(event) {
-            this.toDos.forEach((toDo) => toDo.completed = event.target.checked);
+            this.postRequestService(Promise.all(this.toDos.map(async (toDo) => {
+                toDo.completed = event.target.checked;
+                await TodoDataService.update(toDo.id, toDo);
+            })));
         },
         clearCompletedTask() {
-            this.toDos = this.toDos.filter(toDo => !toDo.completed);
+            this.postRequestService(Promise.all(this.toDos.map(async (toDo) => {
+                if (toDo.completed)
+                    await TodoDataService.delete(toDo.id);
+            })));
         },
+        postRequestService(service) {
+            service
+                .then(response => this.getToDos())
+                // Error service
+                .catch(e => console.log(e));
+        }
     }
 }
 </script>
