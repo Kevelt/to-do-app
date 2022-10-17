@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const urlAPI = 'http://localhost:3000/';
+const PORT = process?.env?.PORT_API || 3003;
+const urlAPI = `http://localhost:${PORT}/`;
 const table = 'todos';
 
 class TodosDataService {
@@ -16,8 +17,16 @@ class TodosDataService {
     return axios.put(`${urlAPI}${table}/${id}`, data);
   }
 
+  updateMulti(data) {
+    return axios.put(`${urlAPI}${table}`, data);
+  }
+
   delete(id) {
     return axios.delete(`${urlAPI}${table}/${id}`);
+  }
+
+  deleteMulti(data) {
+    return axios.delete(`${urlAPI}${table}/`, { data });
   }
 }
 

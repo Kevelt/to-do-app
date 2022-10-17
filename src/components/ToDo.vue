@@ -41,7 +41,6 @@ export default {
         newTodo: '',
         toDos: [],
         toDoFilterTask: [],
-        showList: false,
     }),
     mounted() {
         this.getToDos();
@@ -72,17 +71,23 @@ export default {
             this.postRequestService(TodoDataService.delete(id));
         },
         checkAllToDoTasks(event) {
-            // ToDo: Fix request call to db
-            this.postRequestService(Promise.all(this.toDos.map(async (toDo) => {
-                toDo.completed = event.target.checked;
-                await TodoDataService.update(toDo.id, toDo);
-            })));
+            const dataToUpdate = [];
+            const newValue = event.target.checked;
+            this.toDos.map(async (toDo) => {
+                if (newValue !== toDo.completed) {
+                    toDo.completed = newValue;
+                    dataToUpdate.push(toDo);
+                }
+            });
+            this.postRequestService(TodoDataService.updateMulti(dataToUpdate));
         },
         clearCompletedTask() {
-            this.postRequestService(Promise.all(this.toDos.map(async (toDo) => {
+            const dataToRemove = [];
+            this.toDos.map(async (toDo) => {
                 if (toDo.completed)
-                    await TodoDataService.delete(toDo.id);
-            })));
+                    dataToRemove.push(toDo);
+            });
+            this.postRequestService(TodoDataService.deleteMulti(dataToRemove));
         },
         postRequestService(service) {
             service
@@ -93,12 +98,7 @@ export default {
     },
     computed: {
         hiddenList(){
-            const list = this.toDos.length;
-            if(list > 0) {
-                return this.showList = true;
-            } else {
-                return this.showList = false;
-            }
+            return !!this.toDos.length;
         }
     }
 }

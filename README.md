@@ -5,15 +5,28 @@
 npm install
 ```
 
-### Compiles and hot-reloads for development
+### Run API jsonserver
+```
+npm run api
+```
+
+### Vue Compiles and hot-reloads for development
 ```
 npm run serve
 ```
 
-### Compiles and minifies for production
+### OPTIONAL: Change ports
 ```
-npm run build
+You can change to a custom port in .env file
+```
+```conf
+#default vue-cli port
+PORT=3002
+
+#default json-server port
+PORT_API=3003
 ```
 
 ### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+See [Vue-CLI Configuration Reference](https://cli.vuejs.org/config/)
+and [JSON-Server Configuration Reference](https://github.com/typicode/json-server).
