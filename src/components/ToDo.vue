@@ -7,8 +7,9 @@
         placeholder="New Task"
         v-model="newTodo"
         @keyup.enter="addToDo"
+        autofocus
     />
-    <div class="">
+    <div :class="{hidden: !hiddenList}">
         <ToDoList
             :toDos="toDoFilterTask"
             @editItem="editToDo"
@@ -40,6 +41,7 @@ export default {
         newTodo: '',
         toDos: [],
         toDoFilterTask: [],
+        showList: false,
     }),
     mounted() {
         this.getToDos();
@@ -70,6 +72,7 @@ export default {
             this.postRequestService(TodoDataService.delete(id));
         },
         checkAllToDoTasks(event) {
+            // ToDo: Fix request call to db
             this.postRequestService(Promise.all(this.toDos.map(async (toDo) => {
                 toDo.completed = event.target.checked;
                 await TodoDataService.update(toDo.id, toDo);
@@ -86,6 +89,16 @@ export default {
                 .then(response => this.getToDos())
                 // Error service
                 .catch(e => console.log(e));
+        }
+    },
+    computed: {
+        hiddenList(){
+            const list = this.toDos.length;
+            if(list > 0) {
+                return this.showList = true;
+            } else {
+                return this.showList = false;
+            }
         }
     }
 }
